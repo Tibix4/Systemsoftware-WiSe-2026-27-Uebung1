@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
@@ -56,6 +55,8 @@ public class Counter_beliebigviele_threads {
 		Pattern pattern = Pattern.compile(regex);
 		File[] files = new File(folder).listFiles();
         List<File> goodFilesList = new ArrayList<>();
+        int filesPerThread = 1;
+        int modthread = 0;
 
         for (File file : files) {
             if (file.isDirectory()) {
@@ -64,39 +65,52 @@ public class Counter_beliebigviele_threads {
                 goodFilesList.add(file);
             }
         }
+        if (goodFilesList.isEmpty()) {
+            System.out.println("Keine Dateien gefunden, die dem Muster entsprechen.");
+            return 0;
+        }
         List<Thread> threads = new ArrayList<>();
         if (thread_zahl > goodFilesList.size()) {
             thread_zahl = goodFilesList.size();
-        }else {
-            int filesPerThread = goodFilesList.size() / thread_zahl;
+        }
+        //else if(goodFilesList.size() % thread_zahl != 0 && goodFilesList.size() / 2 < thread_zahl){
+            //filesPerThread = (goodFilesList.size() / thread_zahl) + 1;
+        //}
+        else {
+            filesPerThread = goodFilesList.size() / thread_zahl;
+            modthread = goodFilesList.size() % thread_zahl; 
         }
 
 		for (int i = 0; i < thread_zahl; i++) {
-            for (int k = fielesPerThread, k >= 0; k--) {
-               
-				Thread thread = new Thread(() -> {
-					try {
-						size.addAndGet(countLines(file.getAbsolutePath()));
-					} catch (IOException e) {
-							e.printStackTrace();
-					}
-				});
-				thread.start();
-				threads.add(thread);
-		} 
-            //else if (file.isDirectory()) {
-			//	size.addAndGet(countLinesInAllFiles(file.getAbsolutePath(), regex));
-			//}
-		
-		for (Thread thread : threads) {
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		return size.get();
+            List<File> filesForThreadList = new ArrayList<>();
+            filesForThreadList = goodFilesList.subList(i * filesPerThread, (i + 1) * filesPerThread);    
+			if(modthread > 0) {
+                modthread--;
+                filesForThreadList.add(goodFilesList.get(goodFilesList.size() - modthread - 1));
+            }
+            System.out.println("Thread " + (i + 1) + " bearbeitet " + filesForThreadList.size() + " Dateien."); 
+            File[] fielesForThread = filesForThreadList.toArray(new File[0]);
+            
+            Thread thread = new Thread(() -> {
+				try {
+                    for(File file : fielesForThread){
+                        size.addAndGet(countLines(file.getAbsolutePath()));
+                    }
+                } catch (IOException e) {
+						e.printStackTrace();
+				}
+			});
+            thread.start();
+            threads.add(thread);
+            for (Thread thread1 : threads) {
+                try {
+                    thread1.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return size.get();
     }
 
     public static long countLines(String fileName) throws IOException {
