@@ -88,7 +88,7 @@ public class Counter_beliebigviele_threads {
                 modthread--;
                 filesForThreadList.add(goodFilesList.get(goodFilesList.size() - modthread - 1));
             }
-            System.out.println("Thread " + (i + 1) + " bearbeitet " + filesForThreadList.size() + " Dateien."); 
+            //System.out.println("Thread " + (i + 1) + " bearbeitet " + filesForThreadList.size() + " Dateien."); 
             File[] fielesForThread = filesForThreadList.toArray(new File[0]);
             
             Thread thread = new Thread(() -> {
