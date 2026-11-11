@@ -34,6 +34,7 @@ public class Counter_beliebigviele_threads {
 		System.out.println("Anzahl Zeilen: " + totalLines);
 		System.out.println("Benötigte Zeit: "
 				+ (endTime - startTime) / 1_000_000.0 + " ms");
+        System.out.println("Anzahl Threads: " + threa_anzahl+"\n");
 	}
 
 
@@ -57,6 +58,7 @@ public class Counter_beliebigviele_threads {
         List<File> goodFilesList = new ArrayList<>();
         int filesPerThread = 1;
         int modthread = 0;
+        List<Thread> threads = new ArrayList<>();
 
         for (File file : files) {
             if (file.isDirectory()) {
@@ -69,7 +71,6 @@ public class Counter_beliebigviele_threads {
             System.out.println("Keine Dateien gefunden, die dem Muster entsprechen.");
             return 0;
         }
-        List<Thread> threads = new ArrayList<>();
         if (thread_zahl > goodFilesList.size()) {
             thread_zahl = goodFilesList.size();
         }
@@ -102,12 +103,12 @@ public class Counter_beliebigviele_threads {
 			});
             thread.start();
             threads.add(thread);
-            for (Thread thread1 : threads) {
-                try {
-                    thread1.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        }
+        for (Thread thread1 : threads) {
+            try {
+                thread1.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
         return size.get();
